@@ -2059,7 +2059,7 @@ static void ggml_vec_dot_q4_0(const int n, float * restrict s, const void * rest
             __m256 q = _mm256_cvtepi32_ps( xy_q );
 
             /* Multiply q with scale and accumulate */
-            acc = _mm256_fmadd_ps( scale, q, acc );
+            acc = GGML_F32x8_FMA(acc, scale, q);
         }
     }
 
@@ -2291,8 +2291,8 @@ static void ggml_vec_dot_q4_1(const int n, float * restrict s, const void * rest
         __m256 p = _mm256_cvtepi32_ps( i32 );
         // Apply the scale, and accumulate
         // acc += d0*d1*x*y + d0*m1*x + d1*m0*y
-        acc = _mm256_fmadd_ps( scale_01, p, acc );
-        acc = _mm256_fmadd_ps( cross_scales, sums, acc );
+        acc = GGML_F32x8_FMA(acc, scale_01, p);
+        acc = GGML_F32x8_FMA(acc, cross_scales, sums);
         // acc_offset += m0*m1 (for each entry in the block)
         acc_offset += (*m0)*(*m1);
     }
